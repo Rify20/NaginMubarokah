@@ -254,14 +254,12 @@
             opacity: 1;
             pointer-events: auto;
         }
-        
-        /* --- PERBAIKAN CSS UTAMA AGAR FOTO LANGSUNG MUNCUL --- */
         .photo-item {
             background-color: var(--soft-pink); 
             border-radius: 15px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            /* HAPUS 'cursor: pointer;' */
+            cursor: pointer;
             position: relative;
             min-height: 250px;
             display: flex;
@@ -269,29 +267,59 @@
             align-items: center;
             transition: box-shadow 0.3s ease, transform 0.3s ease;
         }
-        /* HAPUS .photo-item::before */
+        .photo-item::before {
+            content: 'Klik untuk melihat foto';
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+            text-align: center;
+            padding: 10px;
+        }
         .photo-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
-            /* FOTO LANGSUNG TERLIHAT (OPACITY 1) */
-            opacity: 1; 
+            opacity: 0;
             transition: opacity 0.5s ease, transform 0.4s ease;
-            /* HAPUS FILTER GRAYSCALE */
-            filter: grayscale(0); 
+            filter: grayscale(0.5);
             position: absolute;
             top: 0;
             left: 0;
         }
-        /* HAPUS SEMUA KODE TERKAIT .revealed CLASS */
-        
-        .photo-item:hover img {
+        .photo-item.revealed::before {
+            opacity: 0;
+        }
+        .photo-item.revealed img {
+            opacity: 1;
+            filter: grayscale(0);
+            transform: scale(1.05);
+        }
+        .photo-item.revealed:hover img {
             transform: scale(1.1);
         }
-        /* HAPUS SEMUA KODE TERKAIT .caption */
-        /* Sampai di sini perbaikan CSS untuk foto */
-
+        .photo-item.revealed .caption {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .photo-item .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            font-size: 0.95rem;
+            color: var(--secondary-color);
+            line-height: 1.4;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
+            text-align: left;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(20px);
+        }
         .nav-buttons {
             display: flex;
             justify-content: center;
@@ -400,7 +428,7 @@
             left: -10px;
         }
 
-        /* --- MODAL (POP-UP) STYLES (DI BIARKAN AGAR TIDAK ERROR JIKA DIPAKAI) --- */
+        /* --- MODAL (POP-UP) STYLES --- */
         .modal {
             display: none;
             position: fixed;
@@ -526,8 +554,9 @@
 </head>
 <body>
 
-    <audio id="background-music" loop>
-        <source src="assets/lesung-pipimu.mp3" type="audio/mpeg">
+    <!-- UPDATE PATH: Audio dengan path yang benar -->
+    <audio id="background-music" loop muted>
+        <source src="./assets/lesung-pipimu.mp3" type="audio/mpeg">
         Browser kamu tidak mendukung audio.
     </audio>
 
@@ -570,33 +599,43 @@
         
         <div class="memories-container">
             <div class="memories-pages">
+                <!-- UPDATE PATH: Memories Page 1 dengan nama file yang sesuai -->
                 <div id="memories-page-1" class="photo-gallery active">
                     <div class="photo-item">
-                        <img src="assets/foto-kita-1.jpg" alt="Foto Kenangan 1" loading="lazy">
-                        </div>
-                    <div class="photo-item">
-                        <img src="assets/foto-kita-2.jpg" alt="Foto Kenangan 2" loading="lazy">
+                        <img src="./assets/foto-kita-1.jpeg" alt="Kenangan spesial kita 1" loading="lazy" data-long-caption="Momen indah pertama kita bersama, penuh tawa dan kebahagiaan." data-index="0">
+                        <div class="caption">Momen spesial pertama</div>
                     </div>
                     <div class="photo-item">
-                        <img src="assets/foto-kita-3.jpg" alt="Foto Kenangan 3" loading="lazy">
+                        <img src="./assets/foto-kita-2.jpeg" alt="Kenangan spesial kita 2" loading="lazy" data-long-caption="Di saat-saat seperti inilah aku merasa paling beruntung memilikimu dalam hidupku." data-index="1">
+                        <div class="caption">Kebahagiaan sederhana</div>
                     </div>
                     <div class="photo-item">
-                        <img src="assets/foto-kita-4.jpg" alt="Foto Kenangan 4" loading="lazy">
+                        <img src="./assets/foto-kita-3.jpg" alt="Kenangan spesial kita 3" loading="lazy" data-long-caption="Setiap detik bersamamu adalah cerita yang ingin kukenang selamanya." data-index="2">
+                        <div class="caption">Cerita kita</div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="./assets/foto-kita-4.jpg" alt="Kenangan spesial kita 4" loading="lazy" data-long-caption="Matamu yang indah selalu membuat hari-hariku menjadi lebih cerah dan bermakna." data-index="3">
+                        <div class="caption">Cahaya hidupku</div>
                     </div>
                 </div>
 
+                <!-- UPDATE PATH: Memories Page 2 dengan nama file yang sesuai -->
                 <div id="memories-page-2" class="photo-gallery">
                     <div class="photo-item">
-                        <img src="assets/foto-kita-5.jpg" alt="Foto Kenangan 5" loading="lazy">
+                        <img src="./assets/foto-kita-5.jpg" alt="Kenangan spesial kita 5" loading="lazy" data-long-caption="Petualangan kita yang tak terlupakan, menjelajahi dunia bersama-sama." data-index="4">
+                        <div class="caption">Petualangan kita</div>
                     </div>
                     <div class="photo-item">
-                        <img src="assets/foto-kita-6.jpg" alt="Foto Kenangan 6" loading="lazy">
+                        <img src="./assets/foto-kita-6.jpg" alt="Kenangan spesial kita 6" loading="lazy" data-long-caption="Senyummu adalah sumber kekuatan dan inspirasi bagiku setiap hari." data-index="5">
+                        <div class="caption">Senyum penuh makna</div>
                     </div>
                     <div class="photo-item">
-                        <img src="assets/foto-kita-7.jpg" alt="Foto Kenangan 7" loading="lazy">
+                        <img src="./assets/foto-kita-7.jpg" alt="Kenangan spesial kita 7" loading="lazy" data-long-caption="Bersamamu, bahkan momen biasa pun menjadi luar biasa dan berkesan." data-index="6">
+                        <div class="caption">Momen berharga</div>
                     </div>
                     <div class="photo-item">
-                        <img src="assets/foto-kita-8.jpg" alt="Foto Kenangan 8" loading="lazy">
+                        <img src="./assets/foto-kita-8.jpg" alt="Kenangan spesial kita 8" loading="lazy" data-long-caption="Aku berjanji akan selalu menciptakan lebih banyak kenangan indah bersamamu." data-index="7">
+                        <div class="caption">Janji abadi</div>
                     </div>
                 </div>
             </div>
@@ -658,11 +697,11 @@
             const typedLetterEl = document.getElementById('typed-letter');
             const backgroundMusic = document.getElementById('background-music');
             const envelope = document.getElementById('envelope');
-            // const photoItems = document.querySelectorAll('.photo-item'); // TIDAK DIGUNAKAN LAGI
-            // const photoModal = document.getElementById('photo-modal'); // TIDAK DIGUNAKAN LAGI
-            // const modalImage = document.getElementById('modal-image'); // TIDAK DIGUNAKAN LAGI
-            // const modalCaption = document.getElementById('modal-caption'); // TIDAK DIGUNAKAN LAGI
-            // const closeBtn = document.querySelector('.close-btn'); // TIDAK DIGUNAKAN LAGI
+            const photoItems = document.querySelectorAll('.photo-item');
+            const photoModal = document.getElementById('photo-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalCaption = document.getElementById('modal-caption');
+            const closeBtn = document.querySelector('.close-btn');
             const loadingContainer = document.getElementById('loading-container');
             const shareWaBtn = document.getElementById('share-wa');
             const shareFbBtn = document.getElementById('share-fb');
@@ -671,10 +710,76 @@
             const originalLetterText = typedLetterEl.textContent.trim();
             typedLetterEl.textContent = ''; 
 
+            // Audio fallback untuk mobile
+            function initAudio() {
+                // Event untuk handle audio play
+                openGiftBtn.addEventListener('click', function() {
+                    // Unmute audio
+                    backgroundMusic.muted = false;
+                    
+                    // Play audio dengan user interaction
+                    const playPromise = backgroundMusic.play();
+                    
+                    if (playPromise !== undefined) {
+                        playPromise.then(() => {
+                            console.log("Audio berhasil diputar");
+                        }).catch(error => {
+                            console.log("Auto-play diblokir, menampilkan tombol manual");
+                            showAudioPlayButton();
+                        });
+                    }
+                });
+            }
+
+            function showAudioPlayButton() {
+                const audioBtn = document.createElement('button');
+                audioBtn.innerHTML = '🔊 Putar Musik';
+                audioBtn.style.cssText = `
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    z-index: 1000;
+                    padding: 12px 20px;
+                    background: #ff69b4;
+                    color: white;
+                    border: none;
+                    border-radius: 25px;
+                    font-size: 16px;
+                    cursor: pointer;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                `;
+                
+                audioBtn.onclick = () => {
+                    backgroundMusic.play();
+                    audioBtn.remove();
+                };
+                
+                document.body.appendChild(audioBtn);
+            }
+
+            // Handle gambar error
+            function initImageErrorHandling() {
+                const images = document.querySelectorAll('img');
+                
+                images.forEach(img => {
+                    img.onerror = function() {
+                        console.log('Gambar gagal dimuat:', this.src);
+                        // Fallback image
+                        this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2ZjZTRlYyIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiNmZjY5YjQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5LZW5hbmdhbiBTcGVzaWFsPC90ZXh0Pjwvc3ZnPg==';
+                        this.alt = 'Gambar tidak tersedia';
+                    };
+                    
+                    // Force load image
+                    img.loading = 'eager';
+                });
+            }
+
             // Hide loading screen after page loads
             window.addEventListener('load', () => {
                 setTimeout(() => {
                     loadingContainer.classList.add('hidden');
+                    initAudio();
+                    initImageErrorHandling();
                 }, 1500);
             });
 
@@ -756,7 +861,7 @@
             
             // Open gift button event
             openGiftBtn.addEventListener('click', () => {
-                // backgroundMusic.muted = false; DIHAPUS AGAR BISA DIPEJALANKAN
+                backgroundMusic.muted = false;
                 backgroundMusic.play().catch(e => console.error("Audio playback failed:", e));
                 confetti({
                     particleCount: 150,
@@ -819,14 +924,14 @@
                 }
             });
 
-            /*
-            // LOGIC MODAL POP-UP DIHAPUS SAMA SEKALI KARENA TIDAK DIGUNAKAN LAGI
+            // Photo modal logic
             photoItems.forEach(item => {
                 item.addEventListener('click', () => {
+                    // Animasi zoom-in saat diklik
                     item.classList.add('revealed');
                     
                     const img = item.querySelector('img');
-                    const longCaption = img.dataset.longCaption || "Tidak ada deskripsi.";
+                    const longCaption = img.dataset.longCaption;
                     
                     setTimeout(() => {
                         modalImage.src = img.src;
@@ -836,6 +941,7 @@
                 });
             });
 
+            // Close modal events
             closeBtn.addEventListener('click', () => {
                 photoModal.style.display = 'none';
             });
@@ -844,13 +950,12 @@
                     photoModal.style.display = 'none';
                 }
             });
-            */
 
-
-            // Share functionality (dibiarkan seperti semula)
+            // Share buttons functionality
             shareWaBtn.addEventListener('click', () => {
-                const text = "Aku baru saja menerima kado spesial ini dari kamu! Lihat sendiri yuk: " + window.location.href;
-                window.open(`whatsapp://send?text=${encodeURIComponent(text)}`, '_blank');
+                const text = "Lihat kado spesial yang dibuat untukku! ❤️";
+                const url = window.location.href;
+                window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`, '_blank');
             });
 
             shareFbBtn.addEventListener('click', () => {
@@ -859,9 +964,12 @@
             });
 
             copyLinkBtn.addEventListener('click', () => {
-                navigator.clipboard.writeText(window.location.href)
-                    .then(() => alert("Link berhasil disalin!"))
-                    .catch(err => console.error('Could not copy text: ', err));
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Tautan berhasil disalin!');
+                }).catch(err => {
+                    console.error('Gagal menyalin tautan: ', err);
+                });
             });
         });
     </script>

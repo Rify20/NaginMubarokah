@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kado Spesial untukmu, Nagin Mubarokah</title>
+
+    <link rel="icon" type="image/png" href="favicon.png"> 
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.js"></script>
+    <style>
+        /* --- 1. CSS STYLES --- */
+        @import url('https://fonts.googleapis.com/css2?family=Parisienne&family=Poppins:wght@300;400;600&family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap');
+        :root {
+            /* Palet Warna: Versi Awal */
+            --primary-color: #ff69b4; /* Pink Romantis */
+            --secondary-color: #ffffff; /* Putih */
+            --background-color: #fce4ec; /* Light Pink Background */
+            --text-color: #333;
+            --accent-color: #f06292;
+            --soft-pink: #f8e1e7; /* Warna pink lebih lembut */
+            --light-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+            --medium-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            text-align: center;
+            background-image: linear-gradient(135deg, #fce4ec 0%, #f8bbd0 100%);
+            background-attachment: fixed;
+            overflow-x: hidden;
+            transition: background-color 0.5s ease;
+            position: relative;
+        }
+
+        .page {
+            max-width: 960px;
+            padding: 30px;
+            width: 90%;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%) translateY(50px);
+            pointer-events: none;
+            transition: opacity 1s ease-in-out, transform 1s ease;
+            z-index: 10;
+        }
+        
+        .page.active {
+            display: flex;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #welcome-page h1 {
+            font-family: 'Parisienne', cursive;
+            font-size: clamp(2.8rem, 6vw, 4rem);
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #open-gift-btn {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+            animation: pulse-button 2s infinite;
+        }
+        #open-gift-btn:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.3);
+        }
+        @keyframes pulse-button {
+            0% { transform: scale(1); box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
+            50% { transform: scale(1.02); box-shadow: 0 10px 18px rgba(0,0,0,0.3); }
+            100% { transform: scale(1); box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
+        }
+        /* --- LETTER PAGE STYLES --- */
+        #letter-page {
+            background: none;
+            box-shadow: none;
+        }
+        .envelope-container {
+            width: 100%;
+            max-width: 400px;
+            height: 250px;
+            background-color: var(--soft-pink);
+            border-radius: 10px;
+            box-shadow: var(--medium-shadow);
+            position: relative;
+            margin-top: -100px;
+            cursor: pointer;
+            transition: transform 1s ease-in-out;
+        }
+        .envelope-container.opened {
+            transform: translateY(100px);
+        }
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-top: 125px solid var(--accent-color);
+            border-left: 200px solid transparent;
+            border-right: 200px solid transparent;
+            border-bottom: 125px solid transparent;
+            border-radius: 10px 10px 0 0;
+            transform-origin: top;
+            transition: transform 0.5s ease-in-out;
+            z-index: 2;
+        }
+        .envelope-container.opened .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+        #letter-sheet {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 80%;
+            max-width: 600px;
+            background-color: #f8f5f2;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: var(--medium-shadow);
+            transform: translate(-50%, 0) scaleY(0.1);
+            transform-origin: top center;
+            transition: transform 1s cubic-bezier(0.25, 0.1, 0.25, 1) 0.5s, opacity 0.5s ease;
+            opacity: 0;
+            z-index: 1;
+            text-align: left;
+            height: auto;
+            max-height: 85vh;
+            overflow-y: auto;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+        .envelope-container.opened #letter-sheet {
+            opacity: 1;
+            transform: translate(-50%, -70%) scaleY(1);
+        }
+        #letter-sheet h2 {
+            font-family: 'Playfair Display', serif; /* Font premium untuk judul surat */
+            font-size: clamp(3rem, 7vw, 4.5rem);
+            color: var(--primary-color);
+            margin-bottom: 35px;
+            text-align: center;
+            line-height: 1.1;
+        }
+        #typed-letter {
+            font-family: 'Lato', sans-serif; /* Font premium untuk isi surat */
+            font-weight: 300;
+            font-size: clamp(1.15rem, 2.5vw, 1.35rem);
+            color: #555;
+            min-height: auto;
+            line-height: 2.2;
+            text-align: left;
+            white-space: pre-wrap;
+        }
+        .typing-cursor {
+            display: inline-block;
+            width: 3px;
+            height: 1.2em; 
+            background-color: var(--primary-color);
+            margin-left: 5px;
+            animation: blink 0.7s infinite;
+        }
+        #view-memories-btn {
+            opacity: 0;
+            pointer-events: none;
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transition: background-color 0.3s, transform 0.3s, opacity 0.5s ease-in-out;
+            position: absolute;
+            bottom: 50px;
+            z-index: 11;
+        }
+        #view-memories-btn.show {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        #view-memories-btn:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+        /* --- MEMORIES PAGE STYLES --- */
+        #memories-page h1 {
+            font-family: 'Parisienne', cursive;
+            font-size: clamp(3rem, 7vw, 4rem);
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .message {
+            font-size: clamp(1.1rem, 2.8vw, 1.5rem);
+            color: #555;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+        .memories-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        .memories-pages {
+            position: relative;
+            width: 100%;
+            min-height: 500px;
+            margin-top: 20px;
+        }
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+        }
+        .photo-gallery.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .photo-item {
+            background-color: var(--soft-pink); 
+            border-radius: 15px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            cursor: pointer;
+            position: relative;
+            min-height: 250px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+        .photo-item::before {
+            content: 'Klik untuk melihat foto';
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: rgba(0,0,0,0.5);
+            transition: opacity 0.3s ease;
+            text-align: center;
+            padding: 10px;
+        }
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.4s ease;
+            filter: grayscale(0.5);
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .photo-item.revealed::before {
+            opacity: 0;
+        }
+        .photo-item.revealed img {
+            opacity: 1;
+            filter: grayscale(0);
+            transform: scale(1.05);
+        }
+        .photo-item.revealed:hover img {
+            transform: scale(1.1);
+        }
+        .photo-item.revealed .caption {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .photo-item .caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            font-size: 0.95rem;
+            color: var(--secondary-color);
+            line-height: 1.4;
+            background: linear-gradient(to top, rgba(0,0,0,0.7), rgba(0,0,0,0));
+            text-align: left;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateY(20px);
+        }
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .nav-btn {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .nav-btn.active, .nav-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+        }
+
+        /* --- FINAL PAGE STYLES --- */
+        #final-page h1 {
+            font-family: 'Parisienne', cursive;
+            font-size: clamp(3rem, 7vw, 4rem);
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .final-message {
+            font-size: clamp(1.2rem, 3vw, 1.6rem);
+            color: #555;
+            margin-bottom: 40px;
+            line-height: 1.8;
+            max-width: 800px;
+        }
+        .share-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .share-btn {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            border: none;
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .share-btn:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+        .restart-btn {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 12px 25px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        .restart-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--secondary-color);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        /* --- HEART PARTICLES STYLES --- */
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            transform: rotate(45deg);
+            opacity: 0;
+            z-index: 1;
+        }
+        .heart:before, .heart:after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+        .heart:before {
+            top: -10px;
+            left: 0;
+        }
+        .heart:after {
+            top: 0;
+            left: -10px;
+        }
+
+        /* --- MODAL (POP-UP) STYLES --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 20;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background-color: var(--background-color);
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 90%;
+            width: 600px;
+            position: relative;
+            box-shadow: var(--medium-shadow);
+            transform: scale(0.9);
+            animation: zoomIn 0.5s forwards;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .modal-content img {
+            width: 100%;
+            height: auto;
+            max-height: 70vh;
+            border-radius: 10px;
+            object-fit: contain;
+            box-shadow: var(--light-shadow);
+        }
+        .modal-caption {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-color);
+            text-align: left;
+            padding: 0 10px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: #aaa;
+            font-size: 30px;
+            font-weight: bold;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        .close-btn:hover, .close-btn:focus {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes zoomIn {
+            from { transform: scale(0.9); }
+            to { transform: scale(1); }
+        }
+
+        /* --- LOADING STYLES --- */
+        .loading-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--background-color);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.5s ease;
+        }
+        .loading-container.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255, 105, 180, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        .loading-text {
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* --- RESPONSIVE STYLES --- */
+        @media (max-width: 768px) {
+            .page {
+                padding: 20px;
+            }
+            .photo-gallery {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+            .photo-item {
+                min-height: 200px;
+            }
+            .share-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .share-btn, .restart-btn {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="background-music" loop muted>
+        <source src="assets/lesung-pipimu.mp3" type="audio/mpeg">
+        Browser kamu tidak mendukung audio.
+    </audio>
+
+    <div id="heart-particles-container"></div>
+
+    <div class="loading-container" id="loading-container">
+        <div class="loading-spinner"></div>
+        <p class="loading-text">Memuat kado spesial...</p>
+    </div>
+
+    <section id="welcome-page" class="page active">
+        <h1>Selamat datang, Nagin Mubarokah ❤️</h1>
+        <button id="open-gift-btn">Buka Kado Ini!</button>
+    </section>
+
+    <section id="letter-page" class="page">
+        <h2>Surat Spesial Untukmu</h2>
+        <div class="envelope-container" id="envelope">
+            <div class="envelope-flap"></div>
+            <div id="letter-sheet">
+                <h2>Selamat Ulang Tahun! 🎉</h2>
+                <p id="typed-letter">
+                    Selamat ulang tahun, cintaku! Hari ini adalah hari spesialmu, dan mas ingin membuatmu merasa paling bahagia di dunia. Setiap hari bersamamu adalah petualangan, dan mas berjanji untuk selalu menemanimu dalam setiap langkah.
+                    <br><br>Semoga semua impian dan harapanmu tercapai. mas akan selalu ada untuk mendukungmu, dalam suka maupun duka. Mas sangat beruntung memilikimu. Terima kasih untuk semua tawa, pelukan, dan cinta yang tak terhingga.
+                    <br><br>Mas mencintaimu, lebih dari kata-kata yang mas bisa mengungkapkan.
+                    <br><br>Dari kekasihmu yang paling menyayangimu,
+                    <br>Rifki Bimantara Saputra
+                </p>
+            </div>
+        </div>
+        <button id="view-memories-btn">Lihat Kenangan Kita 📸</button>
+    </section>
+
+    <section id="memories-page" class="page">
+        <h1>Kenangan Manis Kita 📸</h1>
+        <p class="message">
+            Setiap momen bersamamu adalah hadiah terindah.
+            <br>Terima kasih telah menjadi bagian paling indah dalam hidupku.
+        </p>
+        
+        <div class="memories-container">
+            <div class="memories-pages">
+                <div id="memories-page-1" class="photo-gallery active">
+                    <div class="photo-item">
+                        <img src="assets/foto-kita-1.jpg" alt="" loading="lazy" data-long-caption="" data-index="0">
+                        <div class="caption"></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="assets/foto-kita-2.jpg" alt="" loading="lazy" data-long-caption="" data-index="1">
+                        <div class="caption"></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="assets/foto-kita-3.jpg" alt="Foto Kenangan 3" loading="lazy" data-long-caption="" data-index="2">
+                        <div class="caption"></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="assets/foto-kita-4.jpg" alt="Foto Kenangan 4" loading="lazy" data-long-caption="" data-index="3">
+                        <div class="caption"></div>
+                    </div>
+                </div>
+
+                <div id="memories-page-2" class="photo-gallery">
+                    <div class="photo-item">
+                        <img src="assets/foto-kita-5.jpg" alt="Foto Kenangan 5" loading="lazy" data-long-caption="" data-index="4">
+                        <div class="caption"></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="assets/foto-kita-6.jpg" alt="Foto Kenangan 6" loading="lazy" data-long-caption="" data-index="5">
+                        <div class="caption"></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="assets/foto-kita-7.jpg" alt="Foto Kenangan 7" loading="lazy" data-long-caption="" data-index="6">
+                        <div class="caption"></div>
+                    </div>
+                    <div class="photo-item">
+                        <img src="assets/foto-kita-8.jpg" alt="Foto Kenangan 8" loading="lazy" data-long-caption="" data-index="7">
+                        <div class="caption"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="nav-btn active" data-target="memories-page-1">Halaman 1</button>
+                <button class="nav-btn" data-target="memories-page-2">Halaman 2</button>
+                <button id="view-final-btn" class="nav-btn">Selanjutnya</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="final-page" class="page">
+        <h1>Terima Kasih, Sayangku! ❤️</h1>
+        <p class="final-message">
+            Terima kasih telah menjadi bagian terindah dalam hidupmas. 
+            <br>Setiap momen bersamamu adalah berharga dan akan selalu kusimpan dalam hatimas.
+            <br><br>Mas berjanji akan selalu membuatmu tersenyum dan bahagia.
+            <br>Selamat ulang tahun sekali lagi, Nagin Mubarokah!
+            <br><br>Aku mencintaimu lebih dari apapun.
+        </p>
+        
+        <div class="share-buttons">
+            <button class="share-btn" id="share-wa">
+                <i>📱</i> Bagikan via WhatsApp
+            </button>
+            <button class="share-btn" id="share-fb">
+                <i>👤</i> Bagikan ke Facebook
+            </button>
+            <button class="share-btn" id="copy-link">
+                <i>🔗</i> Salin Tautan
+            </button>
+        </div>
+        
+        <button class="restart-btn" id="restart-btn">Lihat Kembali dari Awal</button>
+    </section>
+
+    <div id="photo-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <img id="modal-image" src="" alt="Foto Kenangan">
+            <p id="modal-caption" class="modal-caption"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Elements
+            const welcomePage = document.getElementById('welcome-page');
+            const letterPage = document.getElementById('letter-page');
+            const memoriesPage = document.getElementById('memories-page');
+            const finalPage = document.getElementById('final-page');
+            const openGiftBtn = document.getElementById('open-gift-btn');
+            const viewMemoriesBtn = document.getElementById('view-memories-btn');
+            const viewFinalBtn = document.getElementById('view-final-btn');
+            const restartBtn = document.getElementById('restart-btn');
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const photoGalleryPages = document.querySelectorAll('.photo-gallery');
+            const typedLetterEl = document.getElementById('typed-letter');
+            const backgroundMusic = document.getElementById('background-music');
+            const envelope = document.getElementById('envelope');
+            const photoItems = document.querySelectorAll('.photo-item');
+            const photoModal = document.getElementById('photo-modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalCaption = document.getElementById('modal-caption');
+            const closeBtn = document.querySelector('.close-btn');
+            const loadingContainer = document.getElementById('loading-container');
+            const shareWaBtn = document.getElementById('share-wa');
+            const shareFbBtn = document.getElementById('share-fb');
+            const copyLinkBtn = document.getElementById('copy-link');
+            
+            const originalLetterText = typedLetterEl.textContent.trim();
+            typedLetterEl.textContent = ''; 
+
+            // Hide loading screen after page loads
+            window.addEventListener('load', () => {
+                setTimeout(() => {
+                    loadingContainer.classList.add('hidden');
+                }, 1500);
+            });
+
+            // Heart particles function
+            function createHeartParticles() {
+                const container = document.getElementById('heart-particles-container');
+                for (let i = 0; i < 20; i++) {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart');
+                    
+                    // Random position
+                    const posX = Math.random() * 100;
+                    const posY = Math.random() * 100;
+                    
+                    // Random size
+                    const size = Math.random() * 10 + 10;
+                    
+                    // Random animation delay
+                    const delay = Math.random() * 5;
+                    
+                    // Random animation duration
+                    const duration = Math.random() * 3 + 3;
+                    
+                    // Apply styles
+                    heart.style.left = `${posX}vw`;
+                    heart.style.top = `${posY}vh`;
+                    heart.style.width = `${size}px`;
+                    heart.style.height = `${size}px`;
+                    heart.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+                    
+                    // Create CSS for floating animation
+                    const style = document.createElement('style');
+                    style.textContent = `
+                        @keyframes float {
+                            0% {
+                                transform: translateY(0) rotate(45deg);
+                                opacity: 0;
+                            }
+                            50% {
+                                opacity: 0.7;
+                            }
+                            100% {
+                                transform: translateY(-100vh) rotate(45deg);
+                                opacity: 0;
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                    
+                    container.appendChild(heart);
+                }
+            }
+
+            // Switch page function
+            function switchPage(activePage, previousPage) {
+                if (previousPage) {
+                    previousPage.classList.remove('active');
+                }
+                activePage.classList.add('active');
+                
+                // Create heart particles on certain pages
+                if (activePage.id === 'letter-page' || activePage.id === 'final-page') {
+                    createHeartParticles();
+                }
+            }
+
+            // Typewriter effect
+            function typeWriter(text, i) {
+                if (i < text.length) {
+                    typedLetterEl.innerHTML = text.substring(0, i + 1) + '<span class="typing-cursor"></span>';
+                    setTimeout(() => {
+                        typeWriter(text, i + 1);
+                    }, 40);
+                } else {
+                    typedLetterEl.innerHTML = text; 
+                    viewMemoriesBtn.classList.add('show');
+                }
+            }
+            
+            // Open gift button event
+            openGiftBtn.addEventListener('click', () => {
+                backgroundMusic.muted = false;
+                backgroundMusic.play().catch(e => console.error("Audio playback failed:", e));
+                confetti({
+                    particleCount: 150,
+                    spread: 180,
+                    origin: { y: 0.6 }
+                });
+
+                switchPage(letterPage, welcomePage);
+
+                setTimeout(() => {
+                    envelope.classList.add('opened');
+                    setTimeout(() => {
+                        typeWriter(originalLetterText, 0);
+                    }, 500);
+                }, 1000);
+            });
+
+            // View memories button event
+            viewMemoriesBtn.addEventListener('click', () => {
+                switchPage(memoriesPage, letterPage);
+            });
+            
+            // View final page button event
+            viewFinalBtn.addEventListener('click', () => {
+                switchPage(finalPage, memoriesPage);
+                confetti({
+                    particleCount: 200,
+                    spread: 180,
+                    origin: { y: 0.6 }
+                });
+            });
+            
+            // Restart button event
+            restartBtn.addEventListener('click', () => {
+                switchPage(welcomePage, finalPage);
+            });
+            
+            // Switch memories page function
+            function switchMemoriesPage(targetId) {
+                photoGalleryPages.forEach(page => {
+                    page.classList.remove('active');
+                    if (page.id === targetId) {
+                        page.classList.add('active');
+                    }
+                });
+                navButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.dataset.target === targetId) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            // Nav buttons event
+            navButtons.forEach(btn => {
+                if (btn.dataset.target) {
+                    btn.addEventListener('click', (e) => {
+                        switchMemoriesPage(e.target.dataset.target);
+                    });
+                }
+            });
+
+            // Photo modal logic
+            photoItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    // Animasi zoom-in saat diklik
+                    item.classList.add('revealed');
+                    
+                    const img = item.querySelector('img');
+                    const longCaption = img.dataset.longCaption;
+                    
+                    setTimeout(() => {
+                        modalImage.src = img.src;
+                        modalCaption.textContent = longCaption;
+                        photoModal.style.display = 'flex';
+                    }, 500);
+                });
+            });
+
+            // Close modal events
+            closeBtn.addEventListener('click', () => {
+                photoModal.style.display = 'none';
+            });
+            window.addEventListener('click', (event) => {
+                if (event.target === photoModal) {
+                    photoModal.style.display = 'none';
+                }
+            });
+
+            // Share buttons functionality
+            shareWaBtn.addEventListener('click', () => {
+                const text = "Lihat kado spesial yang dibuat untukku! ❤️";
+                const url = window.location.href;
+                window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`, '_blank');
+            });
+
+            shareFbBtn.addEventListener('click', () => {
+                const url = window.location.href;
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+            });
+
+            copyLinkBtn.addEventListener('click', () => {
+                const url = window.location.href;
+                navigator.clipboard.writeText(url).then(() => {
+                    alert('Tautan berhasil disalin!');
+                }).catch(err => {
+                    console.error('Gagal menyalin tautan: ', err);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

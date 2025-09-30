@@ -554,7 +554,7 @@
 <body>
 
     <audio id="background-music" loop muted>
-        <source src="assets/lesung-pipimu.mp3" type="audio/mpeg">
+        <source src="lesung-pipimu.mp3" type="audio/mpeg">
         Browser kamu tidak mendukung audio.
     </audio>
 
@@ -677,160 +677,45 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // --- 2. ELEMENTS SELECTION ---
-            const welcomePage = document.getElementById('welcome-page');
-            const letterPage = document.getElementById('letter-page');
-            const memoriesPage = document.getElementById('memories-page');
-            const finalPage = document.getElementById('final-page');
+            const backgroundMusic = document.getElementById('background-music');
             const openGiftBtn = document.getElementById('open-gift-btn');
+            const envelope = document.getElementById('envelope');
+            const typedLetterEl = document.getElementById('typed-letter');
             const viewMemoriesBtn = document.getElementById('view-memories-btn');
             const viewFinalBtn = document.getElementById('view-final-btn');
             const restartBtn = document.getElementById('restart-btn');
             const navButtons = document.querySelectorAll('.nav-btn');
             const photoGalleryPages = document.querySelectorAll('.photo-gallery');
-            const typedLetterEl = document.getElementById('typed-letter');
-            const backgroundMusic = document.getElementById('background-music');
-            const envelope = document.getElementById('envelope');
             const photoItems = document.querySelectorAll('.photo-item');
             const photoModal = document.getElementById('photo-modal');
             const modalImage = document.getElementById('modal-image');
             const modalCaption = document.getElementById('modal-caption');
             const closeBtn = document.querySelector('.close-btn');
-            const loadingContainer = document.getElementById('loading-container');
-            const shareWaBtn = document.getElementById('share-wa');
-            const copyLinkBtn = document.getElementById('copy-link'); // Hapus shareFbBtn jika tidak digunakan
-            
+
             const originalLetterText = typedLetterEl.textContent.trim();
-            typedLetterEl.textContent = ''; 
-            
-            // --- 3. PHOTO CAPTIONS MAP ---
-            // Ambil data caption dari atribut data-long-caption
-            const photoCaptions = Array.from(photoItems).map(item => ({
-                src: item.querySelector('img').src,
-                caption: item.querySelector('img').dataset.longCaption
-            }));
+            typedLetterEl.textContent = '';
 
-            // --- 4. LOADING SCREEN AND INITIAL SETUP ---
-            // Sembunyikan loading screen setelah semua sumber daya (termasuk musik) dimuat
-            window.addEventListener('load', () => {
-                // Pre-load images for faster viewing later
-                photoCaptions.forEach(data => {
-                    const img = new Image();
-                    img.src = data.src;
-                });
-
-                setTimeout(() => {
-                    loadingContainer.classList.add('hidden');
-                }, 1500);
-            });
-
-            // --- 5. CORE FUNCTIONS ---
-
-            // Heart particles function
-            function createHeartParticles() {
-                const container = document.getElementById('heart-particles-container');
-                // Hapus hati lama
-                container.innerHTML = ''; 
-                for (let i = 0; i < 20; i++) {
-                    const heart = document.createElement('div');
-                    heart.classList.add('heart');
-                    
-                    const posX = Math.random() * 100;
-                    const posY = Math.random() * 100;
-                    const size = Math.random() * 10 + 10;
-                    const delay = Math.random() * 5;
-                    const duration = Math.random() * 5 + 3; // Durasi lebih lama
-                    
-                    heart.style.left = `${posX}vw`;
-                    heart.style.top = `${posY}vh`;
-                    heart.style.width = `${size}px`;
-                    heart.style.height = `${size}px`;
-                    heart.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
-                    
-                    container.appendChild(heart);
-                }
-            }
-            // Tambahkan CSS float animation ke head jika belum ada
-            if (!document.querySelector('style[data-key="float-animation"]')) {
-                const style = document.createElement('style');
-                style.setAttribute('data-key', 'float-animation');
-                style.textContent = `
-                    @keyframes float {
-                        0% { transform: translateY(0) rotate(45deg); opacity: 0; }
-                        50% { opacity: 0.7; }
-                        100% { transform: translateY(-100vh) rotate(45deg); opacity: 0; }
-                    }
-                `;
-                document.head.appendChild(style);
-            }
-
-            // Switch page function
-            function switchPage(activePage, previousPage) {
-                if (previousPage) {
-                    previousPage.classList.remove('active');
-                }
-                activePage.classList.add('active');
-                window.scrollTo(0, 0); // Gulir ke atas halaman baru
-                
-                if (activePage.id === 'letter-page' || activePage.id === 'final-page') {
-                    // Hanya buat partikel saat pertama masuk
-                    if (activePage.dataset.particlesCreated !== 'true') {
-                        createHeartParticles();
-                        activePage.dataset.particlesCreated = 'true';
-                    }
+            // --- 3. AUDIO CONTROL ---
+            async function startAudio() {
+                try {
+                    // Mengaktifkan audio dengan unmute dan mulai play
+                    backgroundMusic.muted = false;
+                    await backgroundMusic.play();
+                    console.log('Audio mulai dimainkan');
+                } catch (error) {
+                    console.error('Audio gagal dimainkan:', error);
                 }
             }
 
-            // Typewriter effect
-            function typeWriter(text, i) {
-                if (i < text.length) {
-                    // Ganti teks baru dengan <br> agar efek ketik terlihat baik
-                    let display = text.substring(0, i + 1)
-                        .replace(/\n/g, '<br>') 
-                        .replace(/<br><br>/g, '<br><br><br>'); // Tambah spasi antar paragraf
-                        
-                    typedLetterEl.innerHTML = display + '<span class="typing-cursor"></span>';
-                    setTimeout(() => {
-                        typeWriter(text, i + 1);
-                    }, 40);
-                } else {
-                    typedLetterEl.innerHTML = text.replace(/\n/g, '<br>').replace(/<br><br>/g, '<br><br><br>');
-                    viewMemoriesBtn.classList.add('show');
-                }
-            }
-            
-            // Photo modal display function
-            function displayPhotoModal(imgSrc, captionText) {
-                modalImage.src = imgSrc;
-                modalCaption.textContent = captionText;
-                photoModal.style.display = 'flex';
-                // Close modal when close button is clicked
-                closeBtn.onclick = () => {
-                    photoModal.style.display = 'none';
-                };
-                // Close modal when clicking outside of modal content
-                photoModal.onclick = (event) => {
-                    if (event.target === photoModal) {
-                        photoModal.style.display = 'none';
-                    }
-                };
-            }
-
-            // --- 6. EVENT LISTENERS ---
-
-            // Open gift button event (Music starts here!)
-            openGiftBtn.addEventListener('click', () => {
-                // KUNCI: Unmute dan play audio setelah interaksi pengguna
-                backgroundMusic.muted = false;
-                backgroundMusic.play().catch(e => console.error("Audio playback failed:", e));
-                
+            // Fungsi untuk membuka kado dan memulai audio setelah klik
+            openGiftBtn.addEventListener('click', async () => {
+                await startAudio(); // Mulai audio setelah interaksi
                 confetti({
                     particleCount: 150,
                     spread: 180,
                     origin: { y: 0.6 }
                 });
-
                 switchPage(letterPage, welcomePage);
-
                 setTimeout(() => {
                     envelope.classList.add('opened');
                     setTimeout(() => {
@@ -838,13 +723,14 @@
                     }, 500);
                 }, 1000);
             });
-            
-            // View memories button event
+
+            // --- 4. EVENT LISTENERS ---
+            // Button untuk melanjutkan ke halaman kenangan
             viewMemoriesBtn.addEventListener('click', () => {
                 switchPage(memoriesPage, letterPage);
             });
-            
-            // View final page button event
+
+            // Button untuk melanjutkan ke halaman final
             viewFinalBtn.addEventListener('click', () => {
                 switchPage(finalPage, memoriesPage);
                 confetti({
@@ -853,90 +739,33 @@
                     origin: { y: 0.6 }
                 });
             });
-            
-            // Restart button event
+
+            // Button untuk restart (mengulang dari awal)
             restartBtn.addEventListener('click', () => {
-                // Reset state
+                // Reset semua state
                 envelope.classList.remove('opened');
                 typedLetterEl.textContent = ''; // Kosongkan surat
                 viewMemoriesBtn.classList.remove('show');
                 
-                // Reset memories page
-                switchMemoriesPage('memories-page-1');
-                photoItems.forEach(item => item.classList.remove('revealed'));
-
                 switchPage(welcomePage, finalPage);
                 
-                // Matikan audio (jika looping) dan mulai lagi dari awal (muted)
+                // Matikan audio (jika looping) dan mulai lagi dari awal
                 backgroundMusic.pause();
                 backgroundMusic.currentTime = 0;
-                backgroundMusic.muted = true; 
+                backgroundMusic.muted = true; // Agar otomatis dimulai dengan mute pada restart
             });
-            
-            // Switch memories page function
-            function switchMemoriesPage(targetId) {
-                photoGalleryPages.forEach(page => {
-                    page.classList.remove('active');
-                    if (page.id === targetId) {
-                        page.classList.add('active');
-                    }
-                });
-                navButtons.forEach(btn => {
-                    btn.classList.remove('active');
-                    if (btn.dataset.target === targetId) {
-                        btn.classList.add('active');
-                    }
-                });
+
+            // Fungsi untuk mengganti halaman (pindah antar page)
+            function switchPage(activePage, previousPage) {
+                if (previousPage) {
+                    previousPage.classList.remove('active');
+                }
+                activePage.classList.add('active');
+                window.scrollTo(0, 0); // Gulir ke atas halaman baru
             }
 
-            // Nav buttons event (untuk pindah halaman foto)
-            navButtons.forEach(btn => {
-                if (btn.dataset.target) {
-                    btn.addEventListener('click', (e) => {
-                        switchMemoriesPage(e.target.dataset.target);
-                    });
-                }
-            });
-
-            // Photo click event (untuk menampilkan modal)
-            photoItems.forEach(item => {
-                item.addEventListener('click', () => {
-                    item.classList.add('revealed');
-                    
-                    const img = item.querySelector('img');
-                    const longCaption = img.dataset.longCaption || "Tidak ada keterangan tambahan.";
-                    
-                    setTimeout(() => {
-                        displayPhotoModal(img.src, longCaption);
-                    }, 500);
-                });
-            }); 
-            
-            // --- 7. SHARE BUTTONS LOGIC ---
-            const shareTitle = "Kado Spesial Ulang Tahun untuk Nagin Mubarokah!";
-            const shareText = "Aku mendapat kado spesial dari Rifki! Klik tautan ini untuk melihatnya:";
-            const shareUrl = window.location.href; 
-
-            shareWaBtn.addEventListener('click', () => {
-                const waLink = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareTitle + " " + shareUrl)}`;
-                window.open(waLink, '_blank');
-            });
-
-            copyLinkBtn.addEventListener('click', async () => {
-                try {
-                    await navigator.clipboard.writeText(shareUrl);
-                    copyLinkBtn.textContent = 'Tautan Disalin! ✅';
-                    setTimeout(() => {
-                        copyLinkBtn.innerHTML = '<i>🔗</i> Salin Tautan';
-                    }, 2000);
-                } catch (err) {
-                    console.error('Gagal menyalin:', err);
-                    copyLinkBtn.textContent = 'Gagal menyalin. ❌';
-                }
-            });
         });
     </script>
 
 </body>
 </html>
-

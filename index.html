@@ -549,16 +549,83 @@
                 width: 200px;
             }
         }
+
+        /* --- AUDIO OVERLAY STYLES --- */
+        #audio-unmute-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: white;
+        }
+        #audio-unmute-overlay p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            text-align: center;
+            padding: 0 20px;
+        }
+        #unmute-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        #unmute-btn:hover {
+            background: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        /* --- AUDIO TOGGLE BUTTON --- */
+        #audio-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            background: rgba(255,105,180,0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        #audio-toggle:hover {
+            background: var(--accent-color);
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
 
-    <audio id="background-music" loop muted>
+    <audio id="background-music" loop preload="metadata">
         <source src="assets/lesung-pipimu.mp3" type="audio/mpeg">
         Browser kamu tidak mendukung audio.
     </audio>
 
     <div id="heart-particles-container"></div>
+
+    <!-- Audio Unmute Overlay untuk Safari -->
+    <div id="audio-unmute-overlay">
+        <p>Putar musik untuk pengalaman terbaik? 🎵</p>
+        <button id="unmute-btn">Putar Musik</button>
+    </div>
+
+    <!-- Audio Toggle Button -->
+    <button id="audio-toggle">🔇</button>
 
     <div class="loading-container" id="loading-container">
         <div class="loading-spinner"></div>
@@ -697,10 +764,16 @@
             const closeBtn = document.querySelector('.close-btn');
             const loadingContainer = document.getElementById('loading-container');
             const shareWaBtn = document.getElementById('share-wa');
-            const copyLinkBtn = document.getElementById('copy-link'); // Hapus shareFbBtn jika tidak digunakan
+            const copyLinkBtn = document.getElementById('copy-link');
+            const audioUnmuteOverlay = document.getElementById('audio-unmute-overlay');
+            const unmuteBtn = document.getElementById('unmute-btn');
+            const audioToggle = document.getElementById('audio-toggle');
             
             const originalLetterText = typedLetterEl.textContent.trim();
             typedLetterEl.textContent = ''; 
+            
+            // Set volume
+            backgroundMusic.volume = 0.7;
             
             // --- 3. PHOTO CAPTIONS MAP ---
             // Ambil data caption dari atribut data-long-caption
@@ -815,13 +888,67 @@
                 };
             }
 
+            // Function untuk handle audio play yang compatible dengan semua browser
+            function playBackgroundMusic() {
+                const playPromise = backgroundMusic.play();
+                
+                if (playPromise !== undefined) {
+                    playPromise.then(() => {
+                        // Audio berhasil diputar
+                        console.log("Audio playing successfully");
+                        audioToggle.innerHTML = '🔊';
+                    }).catch(error => {
+                        // Fallback untuk Safari/iOS
+                        console.log("Autoplay blocked, showing manual play button");
+                        showManualPlayButton();
+                    });
+                }
+            }
+
+            function showManualPlayButton() {
+                audioUnmuteOverlay.style.display = 'flex';
+                
+                unmuteBtn.onclick = () => {
+                    backgroundMusic.play().then(() => {
+                        console.log("Audio berhasil diputar di Safari");
+                        audioUnmuteOverlay.style.display = 'none';
+                        audioToggle.innerHTML = '🔊';
+                    }).catch(error => {
+                        console.error("Gagal memutar audio:", error);
+                        audioUnmuteOverlay.innerHTML = '<p>Browser memblokir audio otomatis. Silakan putar musik manual nanti.</p>';
+                    });
+                };
+            }
+
             // --- 6. EVENT LISTENERS ---
+
+            // Audio toggle functionality
+            audioToggle.addEventListener('click', () => {
+                if (backgroundMusic.paused) {
+                    backgroundMusic.play().then(() => {
+                        audioToggle.innerHTML = '🔊';
+                    }).catch(error => {
+                        console.error("Gagal memutar audio:", error);
+                        showManualPlayButton();
+                    });
+                } else {
+                    backgroundMusic.pause();
+                    audioToggle.innerHTML = '🔇';
+                }
+            });
+
+            // Update icon berdasarkan status audio
+            backgroundMusic.addEventListener('play', () => {
+                audioToggle.innerHTML = '🔊';
+            });
+
+            backgroundMusic.addEventListener('pause', () => {
+                audioToggle.innerHTML = '🔇';
+            });
 
             // Open gift button event (Music starts here!)
             openGiftBtn.addEventListener('click', () => {
-                // KUNCI: Unmute dan play audio setelah interaksi pengguna
-                backgroundMusic.muted = false;
-                backgroundMusic.play().catch(e => console.error("Audio playback failed:", e));
+                playBackgroundMusic();
                 
                 confetti({
                     particleCount: 150,
@@ -867,10 +994,9 @@
 
                 switchPage(welcomePage, finalPage);
                 
-                // Matikan audio (jika looping) dan mulai lagi dari awal (muted)
+                // Matikan audio (jika looping) dan mulai lagi dari awal
                 backgroundMusic.pause();
                 backgroundMusic.currentTime = 0;
-                backgroundMusic.muted = true; 
             });
             
             // Switch memories page function
@@ -939,5 +1065,3 @@
 
 </body>
 </html>
-
-
